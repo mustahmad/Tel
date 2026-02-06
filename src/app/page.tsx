@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
@@ -45,14 +45,26 @@ const FlagFR = () => (
 
 export default function LandingPage() {
   const router = useRouter();
-  const { user, _hasHydrated } = useUserStore();
+  const user = useUserStore((state) => state.user);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  // Подписываемся на завершение гидратации
+  useEffect(() => {
+    if (useUserStore.persist.hasHydrated()) {
+      setHasHydrated(true);
+    }
+    const unsubscribe = useUserStore.persist.onFinishHydration(() => {
+      setHasHydrated(true);
+    });
+    return unsubscribe;
+  }, []);
 
   // Редирект авторизованных пользователей на dashboard
   useEffect(() => {
-    if (_hasHydrated && user) {
+    if (hasHydrated && user) {
       router.replace("/dashboard");
     }
-  }, [_hasHydrated, user, router]);
+  }, [hasHydrated, user, router]);
 
   return (
     <div className="min-h-screen bg-background">

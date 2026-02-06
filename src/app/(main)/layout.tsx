@@ -15,12 +15,32 @@ export default function MainLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, _hasHydrated } = useUserStore();
+  const user = useUserStore((state) => state.user);
+  const [hasHydrated, setHasHydrated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
+  // Подписываемся на завершение гидратации
   useEffect(() => {
-    // Ждём гидратации
-    if (!_hasHydrated) return;
+    // Проверяем, завершилась ли уже гидратация
+    const checkHydration = () => {
+      if (useUserStore.persist.hasHydrated()) {
+        setHasHydrated(true);
+      }
+    };
+
+    checkHydration();
+
+    // Подписываемся на завершение гидратации
+    const unsubscribe = useUserStore.persist.onFinishHydration(() => {
+      setHasHydrated(true);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Проверяем авторизацию после гидратации
+  useEffect(() => {
+    if (!hasHydrated) return;
 
     // Публичные страницы доступны всем
     if (PUBLIC_PAGES.includes(pathname)) {
@@ -35,10 +55,10 @@ export default function MainLayout({
     }
 
     setIsChecking(false);
-  }, [_hasHydrated, user, pathname, router]);
+  }, [hasHydrated, user, pathname, router]);
 
   // Показываем загрузку пока проверяем авторизацию
-  if (isChecking || !_hasHydrated) {
+  if (!hasHydrated || isChecking) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">

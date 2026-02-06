@@ -24,9 +24,11 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user, _hasHydrated, setUser } = useUserStore();
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   const {
     register,
@@ -36,12 +38,23 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
+  // Подписываемся на завершение гидратации
+  useEffect(() => {
+    if (useUserStore.persist.hasHydrated()) {
+      setHasHydrated(true);
+    }
+    const unsubscribe = useUserStore.persist.onFinishHydration(() => {
+      setHasHydrated(true);
+    });
+    return unsubscribe;
+  }, []);
+
   // Редирект если уже авторизован
   useEffect(() => {
-    if (_hasHydrated && user) {
+    if (hasHydrated && user) {
       router.replace("/dashboard");
     }
-  }, [_hasHydrated, user, router]);
+  }, [hasHydrated, user, router]);
 
   const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true);
