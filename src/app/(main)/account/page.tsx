@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Languages, Trash2, Plus, Check } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from "@/components/ui";
@@ -57,7 +57,7 @@ const LEVELS: Array<{ id: Level; label: string }> = [
 
 type Tab = "profile" | "languages";
 
-export default function AccountPage() {
+function AccountContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, updateUser, addLanguage, removeLanguage, logout } = useUserStore();
@@ -369,5 +369,13 @@ export default function AccountPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-8 text-center text-muted">Загрузка...</div>}>
+      <AccountContent />
+    </Suspense>
   );
 }
