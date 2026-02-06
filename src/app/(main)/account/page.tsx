@@ -68,6 +68,7 @@ function AccountContent() {
   const [showAddLanguage, setShowAddLanguage] = useState(false);
   const [selectedNewLanguage, setSelectedNewLanguage] = useState<Language | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Level>("starter");
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -81,6 +82,8 @@ function AccountContent() {
       displayName: displayName || null,
       dailyGoal,
     });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const handleAddLanguage = () => {
@@ -188,9 +191,16 @@ function AccountContent() {
                 </div>
               </div>
 
-              <Button variant="primary" onClick={handleSaveProfile}>
-                Сохранить изменения
-              </Button>
+              {saved ? (
+                <div className="text-success font-medium flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  Сохранено
+                </div>
+              ) : (
+                <Button variant="primary" onClick={handleSaveProfile}>
+                  Сохранить изменения
+                </Button>
+              )}
             </CardContent>
           </Card>
 
