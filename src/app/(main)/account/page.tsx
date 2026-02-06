@@ -212,16 +212,24 @@ function AccountContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">
-                    {user?.subscriptionTier === "premium" ? "Premium" : "Бесплатный план"}
+                    {user?.subscriptionTier === "premium"
+                      ? "Premium"
+                      : user?.subscriptionTier === "pro"
+                        ? "Pro"
+                        : "Бесплатный план"}
                   </div>
                   <div className="text-sm text-muted">
                     {user?.subscriptionTier === "premium"
-                      ? "Полный доступ ко всем урокам"
-                      : "Доступ к первым урокам каждого уровня"}
+                      ? "Максимум возможностей"
+                      : user?.subscriptionTier === "pro"
+                        ? "Полный доступ к урокам"
+                        : "Доступ к первым урокам каждого уровня"}
                   </div>
                 </div>
-                {user?.subscriptionTier !== "premium" && (
-                  <Button variant="english">Улучшить</Button>
+                {(user?.subscriptionTier === "free" || user?.subscriptionTier === "pro") && (
+                  <Button variant="english" onClick={() => router.push("/pricing")}>
+                    {user?.subscriptionTier === "pro" ? "Перейти на Premium" : "Улучшить"}
+                  </Button>
                 )}
               </div>
             </CardContent>

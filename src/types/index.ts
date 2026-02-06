@@ -1,6 +1,6 @@
 export type Language = "en" | "ar" | "fr";
 export type Level = "starter" | "a1" | "a2" | "b1" | "b2" | "c1";
-export type SubscriptionTier = "free" | "premium";
+export type SubscriptionTier = "free" | "pro" | "premium";
 
 export interface LanguageProgress {
   language: Language;
