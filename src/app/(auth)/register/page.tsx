@@ -48,6 +48,7 @@ export default function RegisterPage() {
         displayName: data.email.split("@")[0],
         currentLanguage: null,
         currentLevel: null,
+        languages: [],
         dailyGoal: 15,
         streakDays: 0,
         lastActivityDate: null,

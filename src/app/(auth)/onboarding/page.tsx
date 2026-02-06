@@ -57,30 +57,30 @@ const goals = [
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { setLanguage, setLevel } = useUserStore();
+  const { addLanguage } = useUserStore();
 
   const [step, setStep] = useState<OnboardingStep>("language");
   const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Level | "beginner" | null>(null);
-  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
 
   const progress = step === "language" ? 33 : step === "level" ? 66 : 100;
 
   const handleLanguageSelect = (lang: Language) => {
     setSelectedLanguage(lang);
-    setLanguage(lang);
     setStep("level");
   };
 
   const handleLevelSelect = (level: Level | "beginner") => {
     setSelectedLevel(level);
-    const actualLevel = level === "beginner" ? "starter" : level;
-    setLevel(actualLevel);
     setStep("goal");
   };
 
-  const handleGoalSelect = (goal: string) => {
-    setSelectedGoal(goal);
+  const handleGoalSelect = () => {
+    // Добавляем выбранный язык в массив языков пользователя
+    if (selectedLanguage && selectedLevel) {
+      const actualLevel = selectedLevel === "beginner" ? "starter" : selectedLevel;
+      addLanguage(selectedLanguage, actualLevel as Level);
+    }
     router.push("/dashboard");
   };
 
@@ -156,7 +156,7 @@ export default function OnboardingPage() {
               {goals.map((goal) => (
                 <button
                   key={goal.id}
-                  onClick={() => handleGoalSelect(goal.id)}
+                  onClick={() => handleGoalSelect()}
                   className="p-4 border-2 border-border rounded-xl text-left hover:border-foreground/30 hover:bg-background-alt transition-all flex items-center gap-4"
                 >
                   <div className="p-2 bg-background-alt rounded-lg">

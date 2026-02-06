@@ -2,12 +2,20 @@ export type Language = "en" | "ar" | "fr";
 export type Level = "starter" | "a1" | "a2" | "b1" | "b2" | "c1";
 export type SubscriptionTier = "free" | "premium";
 
+export interface LanguageProgress {
+  language: Language;
+  level: Level;
+  startedAt: string;
+}
+
 export interface User {
   id: string;
   email: string;
   displayName: string | null;
   currentLanguage: Language | null;
   currentLevel: Level | null;
+  // Поддержка нескольких языков
+  languages: LanguageProgress[];
   dailyGoal: number;
   streakDays: number;
   lastActivityDate: string | null;

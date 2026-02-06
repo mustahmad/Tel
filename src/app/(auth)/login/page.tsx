@@ -44,6 +44,9 @@ export default function LoginPage() {
         displayName: data.email.split("@")[0],
         currentLanguage: "en",
         currentLevel: "a1",
+        languages: [
+          { language: "en", level: "a1", startedAt: new Date().toISOString() }
+        ],
         dailyGoal: 15,
         streakDays: 7,
         lastActivityDate: new Date().toISOString(),
