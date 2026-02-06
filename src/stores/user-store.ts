@@ -133,11 +133,13 @@ export const useUserStore = create<UserState>()(
 
       logout: () => {
         console.log("Logout called");
-        set({ user: null, isLoading: false });
-        // Очищаем localStorage
+        // Сначала очищаем localStorage
         if (typeof window !== "undefined") {
           localStorage.removeItem("lingua-user");
+          localStorage.removeItem("lingua-saved-credentials");
         }
+        // Затем сбрасываем состояние
+        set({ user: null, isLoading: false });
       },
     }),
     {

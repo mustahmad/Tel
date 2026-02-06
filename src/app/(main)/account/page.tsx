@@ -82,7 +82,7 @@ const scaleIn = {
 function AccountContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, updateUser, addLanguage, removeLanguage, logout, _hasHydrated } = useUserStore();
+  const { user, updateUser, addLanguage, removeLanguage, logout } = useUserStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [displayName, setDisplayName] = useState("");
@@ -140,14 +140,20 @@ function AccountContent() {
     lang => !userLanguages.some(ul => ul.language === lang.id)
   );
 
-  if (!_hasHydrated) {
+  // Если пользователь не авторизован, показываем сообщение
+  if (!user) {
     return (
-      <div className="max-w-2xl mx-auto p-8 text-center text-muted">
+      <div className="max-w-2xl mx-auto p-8 text-center">
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-english border-t-transparent rounded-full mx-auto"
-        />
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <p className="text-muted">Вы не авторизованы</p>
+          <Button variant="primary" onClick={() => router.push("/login")}>
+            Войти
+          </Button>
+        </motion.div>
       </div>
     );
   }
