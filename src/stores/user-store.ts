@@ -5,8 +5,10 @@ import type { User, Language, Level, LanguageProgress } from "@/types";
 interface UserState {
   user: User | null;
   isLoading: boolean;
+  _hasHydrated: boolean;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
+  setHasHydrated: (state: boolean) => void;
   updateUser: (updates: Partial<User>) => void;
   setLanguage: (language: Language) => void;
   setLevel: (level: Level) => void;
@@ -22,8 +24,10 @@ export const useUserStore = create<UserState>()(
     (set) => ({
       user: null,
       isLoading: true,
+      _hasHydrated: false,
       setUser: (user) => set({ user }),
       setLoading: (isLoading) => set({ isLoading }),
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
       updateUser: (updates) =>
         set((state) => ({
           user: state.user ? { ...state.user, ...updates } : null,
@@ -113,6 +117,9 @@ export const useUserStore = create<UserState>()(
     {
       name: "lingua-user",
       partialize: (state) => ({ user: state.user }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

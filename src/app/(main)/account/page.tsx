@@ -60,15 +60,23 @@ type Tab = "profile" | "languages";
 function AccountContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, updateUser, addLanguage, removeLanguage, logout } = useUserStore();
+  const { user, updateUser, addLanguage, removeLanguage, logout, _hasHydrated } = useUserStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("profile");
-  const [displayName, setDisplayName] = useState(user?.displayName || "");
-  const [dailyGoal, setDailyGoal] = useState(user?.dailyGoal || 15);
+  const [displayName, setDisplayName] = useState("");
+  const [dailyGoal, setDailyGoal] = useState(15);
   const [showAddLanguage, setShowAddLanguage] = useState(false);
   const [selectedNewLanguage, setSelectedNewLanguage] = useState<Language | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Level>("starter");
   const [saved, setSaved] = useState(false);
+
+  // Синхронизация с user при гидрации
+  useEffect(() => {
+    if (user) {
+      setDisplayName(user.displayName || "");
+      setDailyGoal(user.dailyGoal || 15);
+    }
+  }, [user]);
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -110,6 +118,15 @@ function AccountContent() {
   const availableLanguages = ALL_LANGUAGES.filter(
     lang => !userLanguages.some(ul => ul.language === lang.id)
   );
+
+  // Показываем загрузку пока идёт гидрация
+  if (!_hasHydrated) {
+    return (
+      <div className="max-w-2xl mx-auto p-8 text-center text-muted">
+        Загрузка...
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -226,7 +243,7 @@ function AccountContent() {
                         : "Доступ к первым урокам каждого уровня"}
                   </div>
                 </div>
-                {(user?.subscriptionTier === "free" || user?.subscriptionTier === "pro") && (
+                {user?.subscriptionTier !== "premium" && (
                   <Button variant="english" onClick={() => router.push("/pricing")}>
                     {user?.subscriptionTier === "pro" ? "Перейти на Premium" : "Улучшить"}
                   </Button>

@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { User, BookOpen, BarChart3, MessageSquare, Library, ChevronDown, Plus, LogOut, Settings, Globe } from "lucide-react";
+import { User, BookOpen, BarChart3, MessageSquare, Library, ChevronDown, Plus, LogOut, Settings, Globe, Crown } from "lucide-react";
+import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/stores";
 import { LANGUAGES } from "@/lib/utils";
@@ -184,6 +185,19 @@ export function Header() {
 
           {/* User */}
           <div className="flex items-center gap-4">
+            {/* Upgrade button */}
+            {user?.subscriptionTier !== "premium" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/pricing")}
+                className="hidden sm:flex items-center gap-1.5 text-amber-600 border-amber-300 hover:bg-amber-50"
+              >
+                <Crown className="w-4 h-4" />
+                <span className="hidden md:inline">Улучшить</span>
+              </Button>
+            )}
+
             <div className="hidden md:block text-right">
               <div className="text-xs text-muted">Дней подряд</div>
               <div className="font-semibold">{user?.streakDays || 0}</div>
