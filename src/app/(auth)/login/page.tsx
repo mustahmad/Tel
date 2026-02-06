@@ -45,11 +45,11 @@ const loadCredentials = (): { email: string; password: string } | null => {
 export default function LoginPage() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
+  const hasHydrated = useUserStore((state) => state._hasHydrated);
   const setUser = useUserStore((state) => state.setUser);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSavedCredentials, setHasSavedCredentials] = useState(false);
-  const [hasHydrated, setHasHydrated] = useState(false);
 
   const {
     register,
@@ -59,17 +59,6 @@ export default function LoginPage() {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
-
-  // Подписываемся на завершение гидратации
-  useEffect(() => {
-    if (useUserStore.persist.hasHydrated()) {
-      setHasHydrated(true);
-    }
-    const unsubscribe = useUserStore.persist.onFinishHydration(() => {
-      setHasHydrated(true);
-    });
-    return unsubscribe;
-  }, []);
 
   // Редирект если уже авторизован
   useEffect(() => {

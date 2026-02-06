@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Header, MobileNav } from "@/components/shared";
 import { useUserStore } from "@/stores";
@@ -16,54 +16,39 @@ export default function MainLayout({
   const router = useRouter();
   const pathname = usePathname();
   const user = useUserStore((state) => state.user);
-  const [hasHydrated, setHasHydrated] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
-
-  // Подписываемся на завершение гидратации
-  useEffect(() => {
-    // Проверяем, завершилась ли уже гидратация
-    const checkHydration = () => {
-      if (useUserStore.persist.hasHydrated()) {
-        setHasHydrated(true);
-      }
-    };
-
-    checkHydration();
-
-    // Подписываемся на завершение гидратации
-    const unsubscribe = useUserStore.persist.onFinishHydration(() => {
-      setHasHydrated(true);
-    });
-
-    return unsubscribe;
-  }, []);
+  const hasHydrated = useUserStore((state) => state._hasHydrated);
 
   // Проверяем авторизацию после гидратации
   useEffect(() => {
     if (!hasHydrated) return;
 
     // Публичные страницы доступны всем
-    if (PUBLIC_PAGES.includes(pathname)) {
-      setIsChecking(false);
-      return;
-    }
+    if (PUBLIC_PAGES.includes(pathname)) return;
 
-    // Если нет пользователя после гидратации - редирект на логин
+    // Если нет пользователя - редирект на логин
     if (!user) {
       router.replace("/login");
-      return;
     }
-
-    setIsChecking(false);
   }, [hasHydrated, user, pathname, router]);
 
-  // Показываем загрузку пока проверяем авторизацию
-  if (!hasHydrated || isChecking) {
+  // Ждём гидратации
+  if (!hasHydrated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-10 h-10 border-2 border-english border-t-transparent rounded-full mx-auto animate-spin" />
           <p className="text-muted text-sm">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Нет пользователя и не публичная страница - идёт редирект
+  if (!user && !PUBLIC_PAGES.includes(pathname)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-10 h-10 border-2 border-english border-t-transparent rounded-full mx-auto animate-spin" />
         </div>
       </div>
     );
