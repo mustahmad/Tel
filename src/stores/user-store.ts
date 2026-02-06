@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { User, Language, Level, LanguageProgress } from "@/types";
 
 interface UserState {
@@ -12,7 +12,6 @@ interface UserState {
   updateUser: (updates: Partial<User>) => void;
   setLanguage: (language: Language) => void;
   setLevel: (level: Level) => void;
-  // Новые методы для мультиязычности
   addLanguage: (language: Language, level: Level) => void;
   removeLanguage: (language: Language) => void;
   switchLanguage: (language: Language) => void;
@@ -21,103 +20,145 @@ interface UserState {
 
 export const useUserStore = create<UserState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isLoading: true,
       _hasHydrated: false,
-      setUser: (user) => set({ user }),
+
+      setUser: (user) => {
+        console.log("setUser called:", user);
+        set({ user, isLoading: false });
+      },
+
       setLoading: (isLoading) => set({ isLoading }),
-      setHasHydrated: (state) => set({ _hasHydrated: state }),
-      updateUser: (updates) =>
-        set((state) => ({
-          user: state.user ? { ...state.user, ...updates } : null,
-        })),
-      setLanguage: (language) =>
-        set((state) => ({
-          user: state.user ? { ...state.user, currentLanguage: language } : null,
-        })),
-      setLevel: (level) =>
-        set((state) => ({
-          user: state.user ? { ...state.user, currentLevel: level } : null,
-        })),
 
-      // Добавить новый язык для изучения
-      addLanguage: (language, level) =>
-        set((state) => {
-          if (!state.user) return state;
+      setHasHydrated: (state) => {
+        console.log("Hydration state:", state);
+        set({ _hasHydrated: state });
+      },
 
-          // Проверяем, что язык ещё не добавлен
-          const exists = state.user.languages?.some(l => l.language === language);
-          if (exists) {
-            // Просто переключаемся на него
-            return {
-              user: {
-                ...state.user,
-                currentLanguage: language,
-                currentLevel: state.user.languages.find(l => l.language === language)?.level || level,
-              }
-            };
+      updateUser: (updates) => {
+        const currentUser = get().user;
+        console.log("updateUser called:", updates, "current:", currentUser);
+        if (currentUser) {
+          set({ user: { ...currentUser, ...updates } });
+        }
+      },
+
+      setLanguage: (language) => {
+        const currentUser = get().user;
+        if (currentUser) {
+          set({ user: { ...currentUser, currentLanguage: language } });
+        }
+      },
+
+      setLevel: (level) => {
+        const currentUser = get().user;
+        if (currentUser) {
+          set({ user: { ...currentUser, currentLevel: level } });
+        }
+      },
+
+      addLanguage: (language, level) => {
+        const currentUser = get().user;
+        console.log("addLanguage called:", language, level, "user:", currentUser);
+
+        if (!currentUser) {
+          console.log("No user, cannot add language");
+          return;
+        }
+
+        const exists = currentUser.languages?.some(l => l.language === language);
+        if (exists) {
+          const existingLevel = currentUser.languages.find(l => l.language === language)?.level || level;
+          set({
+            user: {
+              ...currentUser,
+              currentLanguage: language,
+              currentLevel: existingLevel,
+            }
+          });
+          return;
+        }
+
+        const newProgress: LanguageProgress = {
+          language,
+          level,
+          startedAt: new Date().toISOString(),
+        };
+
+        set({
+          user: {
+            ...currentUser,
+            languages: [...(currentUser.languages || []), newProgress],
+            currentLanguage: language,
+            currentLevel: level,
           }
+        });
+        console.log("Language added successfully");
+      },
 
-          const newProgress: LanguageProgress = {
-            language,
-            level,
-            startedAt: new Date().toISOString(),
-          };
+      removeLanguage: (language) => {
+        const currentUser = get().user;
+        if (!currentUser) return;
 
-          return {
-            user: {
-              ...state.user,
-              languages: [...(state.user.languages || []), newProgress],
-              currentLanguage: language,
-              currentLevel: level,
-            }
-          };
-        }),
+        const newLanguages = currentUser.languages?.filter(l => l.language !== language) || [];
+        const isCurrentLanguage = currentUser.currentLanguage === language;
 
-      // Удалить язык из изучаемых
-      removeLanguage: (language) =>
-        set((state) => {
-          if (!state.user) return state;
+        set({
+          user: {
+            ...currentUser,
+            languages: newLanguages,
+            currentLanguage: isCurrentLanguage ? (newLanguages[0]?.language || null) : currentUser.currentLanguage,
+            currentLevel: isCurrentLanguage ? (newLanguages[0]?.level || null) : currentUser.currentLevel,
+          }
+        });
+      },
 
-          const newLanguages = state.user.languages?.filter(l => l.language !== language) || [];
-          const isCurrentLanguage = state.user.currentLanguage === language;
+      switchLanguage: (language) => {
+        const currentUser = get().user;
+        if (!currentUser) return;
 
-          return {
-            user: {
-              ...state.user,
-              languages: newLanguages,
-              // Если удаляем текущий язык, переключаемся на первый оставшийся
-              currentLanguage: isCurrentLanguage ? (newLanguages[0]?.language || null) : state.user.currentLanguage,
-              currentLevel: isCurrentLanguage ? (newLanguages[0]?.level || null) : state.user.currentLevel,
-            }
-          };
-        }),
+        const langProgress = currentUser.languages?.find(l => l.language === language);
+        if (!langProgress) return;
 
-      // Переключиться на другой язык
-      switchLanguage: (language) =>
-        set((state) => {
-          if (!state.user) return state;
+        set({
+          user: {
+            ...currentUser,
+            currentLanguage: language,
+            currentLevel: langProgress.level,
+          }
+        });
+      },
 
-          const langProgress = state.user.languages?.find(l => l.language === language);
-          if (!langProgress) return state;
-
-          return {
-            user: {
-              ...state.user,
-              currentLanguage: language,
-              currentLevel: langProgress.level,
-            }
-          };
-        }),
-
-      // Выход из аккаунта
-      logout: () => set({ user: null }),
+      logout: () => {
+        console.log("Logout called");
+        set({ user: null, isLoading: false });
+        // Очищаем localStorage
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("lingua-user");
+        }
+      },
     }),
     {
       name: "lingua-user",
+      storage: createJSONStorage(() => {
+        // Безопасная проверка на SSR
+        if (typeof window === "undefined") {
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          };
+        }
+        return localStorage;
+      }),
       partialize: (state) => ({ user: state.user }),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error("Hydration error:", error);
+        }
+        console.log("Rehydration complete, state:", state?.user);
         state?.setHasHydrated(true);
       },
     }
