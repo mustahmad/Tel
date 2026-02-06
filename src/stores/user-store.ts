@@ -159,7 +159,8 @@ export const useUserStore = create<UserState>()(
           console.error("Hydration error:", error);
         }
         console.log("Rehydration complete, state:", state?.user);
-        state?.setHasHydrated(true);
+        // Используем setState напрямую, т.к. state - это просто данные, не store
+        useUserStore.setState({ _hasHydrated: true });
       },
     }
   )
