@@ -1,4 +1,4 @@
--- Lingua Database Schema
+-- Tel Database Schema
 -- Run this in Supabase SQL Editor
 
 -- Enable UUID extension
