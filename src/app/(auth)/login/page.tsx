@@ -44,7 +44,7 @@ const loadCredentials = (): { email: string; password: string } | null => {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUser } = useUserStore();
+  const { user, _hasHydrated, setUser } = useUserStore();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSavedCredentials, setHasSavedCredentials] = useState(false);
@@ -57,6 +57,13 @@ export default function LoginPage() {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
+
+  // Редирект если уже авторизован
+  useEffect(() => {
+    if (_hasHydrated && user) {
+      router.replace("/dashboard");
+    }
+  }, [_hasHydrated, user, router]);
 
   // Загружаем сохранённые данные при монтировании
   useEffect(() => {

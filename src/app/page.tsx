@@ -1,5 +1,10 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
+import { useUserStore } from "@/stores";
 import {
   Globe,
   Brain,
@@ -39,6 +44,16 @@ const FlagFR = () => (
 );
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { user, _hasHydrated } = useUserStore();
+
+  // Редирект авторизованных пользователей на dashboard
+  useEffect(() => {
+    if (_hasHydrated && user) {
+      router.replace("/dashboard");
+    }
+  }, [_hasHydrated, user, router]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}

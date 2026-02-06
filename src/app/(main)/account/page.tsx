@@ -140,22 +140,9 @@ function AccountContent() {
     lang => !userLanguages.some(ul => ul.language === lang.id)
   );
 
-  // Если пользователь не авторизован, показываем сообщение
+  // Layout уже проверяет авторизацию, но добавим fallback
   if (!user) {
-    return (
-      <div className="max-w-2xl mx-auto p-8 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-4"
-        >
-          <p className="text-muted">Вы не авторизованы</p>
-          <Button variant="primary" onClick={() => router.push("/login")}>
-            Войти
-          </Button>
-        </motion.div>
-      </div>
-    );
+    return null;
   }
 
   return (

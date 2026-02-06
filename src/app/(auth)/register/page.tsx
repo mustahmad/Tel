@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -24,7 +24,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { setUser } = useUserStore();
+  const { user, _hasHydrated, setUser } = useUserStore();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,6 +35,13 @@ export default function RegisterPage() {
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
   });
+
+  // Редирект если уже авторизован
+  useEffect(() => {
+    if (_hasHydrated && user) {
+      router.replace("/dashboard");
+    }
+  }, [_hasHydrated, user, router]);
 
   const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true);
