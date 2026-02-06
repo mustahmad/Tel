@@ -74,7 +74,7 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-center">Вход в Lingua</CardTitle>
+        <CardTitle className="text-center">Вход в Tel</CardTitle>
         {DEMO_MODE && (
           <p className="text-xs text-center text-muted mt-2">Demo режим — введите любые данные</p>
         )}

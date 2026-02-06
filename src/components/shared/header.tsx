@@ -30,7 +30,7 @@ export function Header() {
           {/* Logo and language */}
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-xl font-semibold">
-              Lingua
+              Tel
             </Link>
             <div className="hidden md:flex items-center gap-2 text-sm">
               <div

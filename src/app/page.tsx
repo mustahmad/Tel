@@ -7,7 +7,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="border-b border-border">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="text-xl font-semibold">Lingua</div>
+          <div className="text-xl font-semibold">Tel</div>
           <div className="flex gap-4">
             <Link href="/login">
               <Button variant="ghost">Войти</Button>
@@ -109,7 +109,7 @@ export default function LandingPage() {
       <footer className="border-t border-border mt-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-sm text-muted">
-            Lingua — осознанное изучение языков
+            Tel — осознанное изучение языков
           </div>
         </div>
       </footer>
